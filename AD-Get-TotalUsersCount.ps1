@@ -25,7 +25,7 @@
   #---------------------------------------------------------------------------------------------------------------------------------
 
 .EXAMPLE
-  .\Get-ADTotalUsersCount.ps1 -searchBase "OU=USERS,DC=DOMAIN,DC=COM"
+  .\AD-Get-TotalUsersCount.ps1 -searchBase "OU=USERS,DC=DOMAIN,DC=COM"
 #>
 
 # Set parameters
