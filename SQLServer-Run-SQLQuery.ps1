@@ -1,7 +1,7 @@
 <#
 .DESCRIPTION
   The purpose of this script is to run queries against a SQL database using sqlcmd, export the results to a TXT file and compress it.
-  It assumes that a file called "Run-SQLQuery.sql" with the desired SQL query exists in the same directory where the script is located.
+  It assumes that a file called "SQLServer-Run-SQLQuery.sql" with the desired SQL query exists in the same directory where the script is located.
 .PARAMETER sqlServerName
   The name of the SQL server to connect to
 .PARAMETER databaseName
@@ -16,7 +16,7 @@
   Creation Date:  2019-10-29
   Purpose/Change: Initial script development
 .EXAMPLE
-  .\Run-SQLQuery.ps1 -sqlServerName <sql_server_name> `
+  .\SQLServer-Run-SQLQuery.ps1 -sqlServerName <sql_server_name> `
     -databaseName <sql_database_name> `
     -databaseUserName <sql_database_username> `
     -databaseUserPassword <sql_database_username_password>
@@ -36,7 +36,7 @@ param (
 )
 
 # Set variables
-$sqlStatement = "Run-SQLQuery.sql"
+$sqlStatement = "SQLServer-Run-SQLQuery.sql"
 $timestamp = Get-Date -Format yyyy-MM-dd-HH-mm
 $sqlOutputFile = $databaseName + "-" + $timestamp + "-" + "SQL-QUERY-RESULT.txt"
 $sqlOutputFileCompressed = $databaseName + "-" + $timestamp + "-" + "SQL-QUERY-RESULT.zip"
