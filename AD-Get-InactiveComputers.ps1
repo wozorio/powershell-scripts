@@ -8,11 +8,11 @@
   Purpose/Change: Initial script development
 #>
 
-$DaysInactive = 90 
-$time = (Get-Date).Adddays( - ($DaysInactive))
+$daysInactive = 90 
+$time = (Get-Date).Adddays( - ($daysInactive))
 
 # Get all AD computers with lastLogonTimestamp less than our time
-Get-ADComputer -Filter { LastLogonTimeStamp -lt $time } -Properties LastLogonTimeStamp |
+Get-ADComputer -Filter { LastLogonTimeStamp -lt $time } -Properties LastLogonTimeStamp
 
 # Output hostname and lastLogonTimestamp into CSV
-Select-Object Name, @{Name = "Stamp"; Expression = { [DateTime]::FromFileTime($_.lastLogonTimestamp) } } | Export-Csv ADComputers.csv -notypeinformation
+Select-Object Name, @{Name = "Stamp"; Expression = { [DateTime]::FromFileTime($_.lastLogonTimestamp) } } | Export-Csv ADComputers.csv -NoTypeInformation
