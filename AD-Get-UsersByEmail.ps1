@@ -8,9 +8,6 @@
   Purpose/Change: Initial script development
 #>
 
-ForEach ($email in Get-Content "emails.txt") {
-    Get-ADUser -Filter { EmailAddress -eq $email } `
-        -Properties distinguishedName, Name, SamAccountName, CN, telephoneNumber, mobile `
-    | Select-Object distinguishedName, Name, SamAccountName, CN, telephoneNumber, mobile `
-    | Export-Csv -Append Users.csv -NotypeInformation
-}
+$mail = "well.ozorio@gmail.com"
+
+Get-ADUser -Filter { EmailAddress -eq $mail } -Properties SamAccountName | Select-Object SamAccountName
