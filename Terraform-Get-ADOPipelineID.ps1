@@ -3,7 +3,7 @@
   Used by Terraform external data source resource to fetch pipeline ID from the Azure DevOps Pipelines REST API
 .NOTES
   Version:       1.0
-  Author:        Wellington Ozorio <Wellington.Ozorio@br.bosch.com>
+  Author:        Wellington Ozorio <well.ozorio@gmail.com>
   Creation Date: 2022-03-09
   Arguments:     pipelineName
 #>
