@@ -43,7 +43,7 @@ if (!$buildsToCancel) {
 
 ForEach ($build in $buildsToCancel) {
   try {
-    Write-Output "WARN: Cancelling build $buildUri"
+    Write-Output "WARN: Deleting build $buildUri"
     Invoke-RestMethod `
       -Uri "https://dev.azure.com/$organizationName/$projectName/_apis/build/builds/$($build.id)?api-version=$apiVersion" `
       -Method DELETE `

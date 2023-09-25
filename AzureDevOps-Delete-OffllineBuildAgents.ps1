@@ -51,10 +51,15 @@ if (!$agents) {
 }
 
 $agents | Where-Object { $_.status -eq 'offline' } | ForEach-Object {
-  Write-Output "WARN: Removing $($_.name) agent from $($agentPoolName) agent pool in $($organizationName) organization"
-  Invoke-RestMethod `
-    -Uri "https://dev.azure.com/$($organizationName)/_apis/distributedtask/pools/$($poolId)/agents/$($_.id)?api-version=$($apiVersion)" `
-    -Method DELETE `
-    -ContentType "application/json" `
-    -Headers $header
+  try {
+    Write-Output "WARN: Removing $($_.name) agent from $($agentPoolName) agent pool in $($organizationName) organization"
+    Invoke-RestMethod `
+      -Uri "https://dev.azure.com/$($organizationName)/_apis/distributedtask/pools/$($poolId)/agents/$($_.id)?api-version=$($apiVersion)" `
+      -Method DELETE `
+      -ContentType "application/json" `
+      -Headers $header
+  }
+  catch {
+    Throw $_
+  }
 }
