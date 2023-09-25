@@ -60,6 +60,6 @@ $offlineAgents | ForEach-Object {
       -Headers $header
   }
   catch {
-    Throw $_
+    Throw $_.Exception
   }
 }

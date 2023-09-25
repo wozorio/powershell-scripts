@@ -51,6 +51,6 @@ ForEach ($build in $buildsToCancel) {
       -Headers $header
   }
   catch {
-    Throw $_
+    Throw $_.Exception
   }
 }
