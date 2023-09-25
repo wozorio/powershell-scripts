@@ -20,7 +20,7 @@ param(
   [string]$agentPoolName,
 
   [Parameter(Mandatory = $false)]
-  [string]$apiVersion = '5.1'
+  [string]$apiVersion = '7.2-preview.1'
 )
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -30,7 +30,7 @@ $base64Pat = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBy
 $header = @{Authorization = "Basic $base64Pat" }
 
 try {
-  $agentPools = (Invoke-RestMethod -Uri $agentPoolsUri -Method 'Get' -Headers $header).value
+  $agentPools = (Invoke-RestMethod -Uri $agentPoolsUri -Method GET -ContentType "application/json" -Headers $header).value
 }
 catch {
   throw $_.Exception
@@ -41,23 +41,20 @@ if (!$agentPools) {
   exit 1
 }
 
-If ($agentPools) {
-  $poolId = ($agentPools | Where-Object { $_.Name -eq $agentPoolName }).id
-  $agentsUri = "https://dev.azure.com/$($organizationName)/_apis/distributedtask/pools/$($poolId)/agents?api-version=$($apiVersion)"
-  $agents = (Invoke-RestMethod -Uri $agentsUri -Method 'Get' -Headers $header).value
+$poolId = ($agentPools | Where-Object { $_.Name -eq $agentPoolName }).id
+$agentsUri = "https://dev.azure.com/$($organizationName)/_apis/distributedtask/pools/$($poolId)/agents?api-version=$($apiVersion)"
+$agents = (Invoke-RestMethod -Uri $agentsUri -Method GET -Headers $header).value
 
-  if (!$agents) {
-    Write-Output "ERROR: No agent found in $($agentPoolName) agent pool for $($organizationName) organization"
-    exit 1
-  }
+if (!$agents) {
+  Write-Output "ERROR: No agent found in $($agentPoolName) agent pool for $($organizationName) organization"
+  exit 1
+}
 
-  $agentNames = ($agents | Where-Object { $_.status -eq 'Offline' }).Name
-  $offlineAgents = ($agents | Where-Object { $_.status -eq 'Offline' }).id
-  foreach ($agent in $offlineAgents) {
-    foreach ($agent in $agentNames) {
-      Write-Output "WARN: Removing $($agent) agent from $($agentPoolName) agent pool in $($organizationName) organization"
-      $offlineAgentsUri = "https://dev.azure.com/$($organizationName)/_apis/distributedtask/pools/$($poolId)/agents/$($agent)?api-version=$($apiVersion)"
-      # Invoke-RestMethod -Uri $offlineAgentsUri -Method 'Delete' -Headers $header
-    }
-  }
+$agents | Where-Object { $_.status -eq 'offline' } | ForEach-Object {
+  Write-Output "WARN: Removing $($_.name) agent from $($agentPoolName) agent pool in $($organizationName) organization"
+  Invoke-RestMethod `
+    -Uri https://dev.azure.com/$($organizationName)/_apis/distributedtask/pools/$($_.id)/agents/$($agent)?api-version=$($apiVersion) `
+    -Method DELETE `
+    -ContentType "application/json" `
+    -Headers $header
 }
