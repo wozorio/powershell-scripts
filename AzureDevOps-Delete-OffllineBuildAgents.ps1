@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Removes offline build agents in Azure DevOps from the Organization and Agent pool specified
+  Deletes offline build agents in Azure DevOps from the specified agent pool
 .PARAMETER PAT
   Required. The personal access token for Azure DevOps
 .PARAMETER OrganizationName
@@ -8,7 +8,7 @@
 .PARAMETER AgentPoolName
   Required. The Azure DevOps agent pool name
 .EXAMPLE
-  .\Remove-OfflineAgents.ps1 -PAT "sdfkjsdf892349mfidf983294jkldf832894234sdsdgdfg" -OrganizationName "My-Super-Cool-DevOps-Org" -AgentPoolName "My-Super-Sweet-Agent-Pool"
+  .\AzureDevOps-DeleteOffllineBuildAgents.ps1 -PAT "sdfkjsdf892349mfidf983294jkldf832894234sdsdgdfg" -OrganizationName "My-Super-Cool-DevOps-Org" -AgentPoolName "My-Super-Sweet-Agent-Pool"
 #>
 
 param(
