@@ -43,14 +43,14 @@ if (!$agentPools) {
 
 $poolId = ($agentPools | Where-Object { $_.Name -eq $agentPoolName }).id
 $agentsUri = "https://dev.azure.com/$($organizationName)/_apis/distributedtask/pools/$($poolId)/agents?api-version=$($apiVersion)"
-$agents = (Invoke-RestMethod -Uri $agentsUri -Method GET -Headers $header).value
+$offlineAgents = (Invoke-RestMethod -Uri $agentsUri -Method GET -Headers $header).value | Where-Object { $_.status -eq 'offline' }
 
-if (!$agents) {
-  Write-Output "ERROR: No agent found in $($agentPoolName) agent pool for $($organizationName) organization"
-  exit 1
+if (!$offlineAgents) {
+  Write-Output "INFO: No offline agent found in $($agentPoolName) agent pool"
+  exit 0
 }
 
-$agents | Where-Object { $_.status -eq 'offline' } | ForEach-Object {
+$offlineAgents | ForEach-Object {
   try {
     Write-Output "WARN: Removing $($_.name) agent from $($agentPoolName) agent pool in $($organizationName) organization"
     Invoke-RestMethod `
