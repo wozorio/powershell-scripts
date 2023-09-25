@@ -2,7 +2,7 @@
 .DESCRIPTION
   Used to batch delete queued builds ("pipeline runs")
 .NOTES
-  Version:       1.0
+  Version:       0.1.0
   Author:        Wellington Ozorio <well.ozorio@gmail.com>
   Creation Date: 2023-09-25
   Arguments:     personalAccessToken organizationName projectName [apiVersion]
@@ -23,8 +23,9 @@ param(
   [string]$apiVersion = '7.1-preview.7'
 )
 
-$notStartedBuildsUri = "https://dev.azure.com/$organizationName/$projectName/_apis/build/builds?statusFilter=notStarted&api-version=$apiVersion"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
+$notStartedBuildsUri = "https://dev.azure.com/$organizationName/$projectName/_apis/build/builds?statusFilter=notStarted&api-version=$apiVersion"
 $base64Pat = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("PAT:$personalAccessToken"))
 $header = @{authorization = "Basic $base64Pat" }
 

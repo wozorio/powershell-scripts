@@ -1,62 +1,63 @@
 <#
-.SYNOPSIS
-  Deletes offline build agents in Azure DevOps from the specified agent pool
-.PARAMETER PAT
-  Required. The personal access token for Azure DevOps
-.PARAMETER OrganizationName
-  Required. The Azure DevOps organization name
-.PARAMETER AgentPoolName
-  Required. The Azure DevOps agent pool name
-.EXAMPLE
-  .\AzureDevOps-DeleteOffllineBuildAgents.ps1 -PAT "sdfkjsdf892349mfidf983294jkldf832894234sdsdgdfg" -OrganizationName "My-Super-Cool-DevOps-Org" -AgentPoolName "My-Super-Sweet-Agent-Pool"
+.DESCRIPTION
+  Used to batch delete offline build agents from a specified agent pool
+.NOTES
+  Version:       0.1.0
+  Author:        Wellington Ozorio <well.ozorio@gmail.com>
+  Creation Date: 2023-09-25
+  Arguments:     personalAccessToken organizationName agentPoolName [apiVersion]
 #>
 
 param(
-    [Parameter(Mandatory = $true)]
-    [ValidateNotNullOrEmpty()]
-    [string]$PAT,
+  [Parameter(Mandatory = $true)]
+  [ValidateNotNullOrEmpty()]
+  [string]$personalAccessToken,
 
-    [Parameter(Mandatory = $true)]
-    [string]$OrganizationName,
+  [Parameter(Mandatory = $true)]
+  [string]$organizationName,
 
-    [Parameter(Mandatory = $true)]
-    [string]$AgentPoolName,
+  [Parameter(Mandatory = $true)]
+  [string]$agentPoolName,
 
-    [Parameter(Mandatory = $false)]
-    [string]$ApiVersion = '5.1'
+  [Parameter(Mandatory = $false)]
+  [string]$apiVersion = '5.1'
 )
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$EncodedPAT = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$PAT"))
-$PoolsUrl = "https://dev.azure.com/$($OrganizationName)/_apis/distributedtask/pools?api-version=$($ApiVersion)"
+
+$agentPoolsUri = "https://dev.azure.com/$($organizationName)/_apis/distributedtask/pools?api-version=$($apiVersion)"
+$base64Pat = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$personalAccessToken"))
+$header = @{Authorization = "Basic $base64Pat" }
 
 try {
-    $Pools = (Invoke-RestMethod -Uri $PoolsUrl -Method 'Get' -Headers @{Authorization = "Basic $EncodedPAT" }).value
+  $agentPools = (Invoke-RestMethod -Uri $agentPoolsUri -Method 'Get' -Headers $header).value
 }
 catch {
-    throw $_.Exception
+  throw $_.Exception
 }
 
-If ($Pools) {
-    $PoolId = ($Pools | Where-Object { $_.Name -eq $AgentPoolName }).id
-    $AgentsUrl = "https://dev.azure.com/$($OrganizationName)/_apis/distributedtask/pools/$($PoolId)/agents?api-version=$($ApiVersion)"
-    $Agents = (Invoke-RestMethod -Uri $AgentsUrl -Method 'Get' -Headers @{Authorization = "Basic $EncodedPAT" }).value
-
-    if ($Agents) {
-        $AgentNames = ($Agents | Where-Object { $_.status -eq 'Offline' }).Name
-        $OfflineAgents = ($Agents | Where-Object { $_.status -eq 'Offline' }).id
-        foreach ($OfflineAgent in $OfflineAgents) {
-            foreach ($AgentName in $AgentNames) {
-                Write-Output "Removing: $($AgentName) From Pool: $($AgentPoolName) in Organization: $($OrganizationName)"
-                $OfflineAgentsUrl = "https://dev.azure.com/$($OrganizationName)/_apis/distributedtask/pools/$($PoolId)/agents/$($OfflineAgent)?api-version=$($ApiVersion)"
-                Invoke-RestMethod -Uri $OfflineAgentsUrl -Method 'Delete' -Headers @{Authorization = "Basic $EncodedPAT" }
-            }
-        }
-    }
-    else {
-        Write-Output "No Agents found in $($AgentPoolName) for Organization $($OrganizationName)"
-    }
+if (!$agentPools) {
+  Write-Output "No Pools named $($agentPoolName) found in Organization $($organizationName)"
+  exit 1
 }
-else {
-    Write-Output "No Pools named $($AgentPoolName) found in Organization $($OrganizationName)"
+
+If ($agentPools) {
+  $poolId = ($agentPools | Where-Object { $_.Name -eq $agentPoolName }).id
+  $agentsUri = "https://dev.azure.com/$($organizationName)/_apis/distributedtask/pools/$($poolId)/agents?api-version=$($apiVersion)"
+  $agents = (Invoke-RestMethod -Uri $agentsUri -Method 'Get' -Headers $header).value
+
+  if (!$agents) {
+    Write-Output "ERROR: No agent found in $($agentPoolName) agent pool for $($organizationName) organization"
+    exit 1
+  }
+
+  $agentNames = ($agents | Where-Object { $_.status -eq 'Offline' }).Name
+  $offlineAgents = ($agents | Where-Object { $_.status -eq 'Offline' }).id
+  foreach ($agent in $offlineAgents) {
+    foreach ($agent in $agentNames) {
+      Write-Output "WARN: Removing $($agent) agent from $($agentPoolName) agent pool in $($organizationName) organization"
+      $offlineAgentsUri = "https://dev.azure.com/$($organizationName)/_apis/distributedtask/pools/$($poolId)/agents/$($agent)?api-version=$($apiVersion)"
+      # Invoke-RestMethod -Uri $offlineAgentsUri -Method 'Delete' -Headers $header
+    }
+  }
 }
