@@ -29,18 +29,18 @@ $base64Pat = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$
 $header = @{authorization = "Basic $base64Pat" }
 
 try {
-  $buildsToCancel = (Invoke-RestMethod -Uri $notStartedBuildsUri -Method GET -ContentType "application/json" -Headers $header).value
+  $queuedBuilds = (Invoke-RestMethod -Uri $notStartedBuildsUri -Method GET -ContentType "application/json" -Headers $header).value
 }
 catch {
   throw $_.Exception
 }
 
-if (!$buildsToCancel) {
+if (!$queuedBuilds) {
   Write-Output "INFO: No queued builds found to be deleted"
   exit 0
 }
 
-ForEach ($build in $buildsToCancel) {
+ForEach ($build in $queuedBuilds) {
   try {
     Write-Output "WARN: Deleting build $buildUri"
     Invoke-RestMethod `
