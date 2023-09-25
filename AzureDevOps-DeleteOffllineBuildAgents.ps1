@@ -39,7 +39,7 @@ catch {
 }
 
 if (!$agentPool) {
-  Write-Output "$agentPoolName agent pool not found in $organizationName organization"
+  Write-Output "ERROR: $agentPoolName agent pool not found in $organizationName organization"
   exit 1
 }
 
