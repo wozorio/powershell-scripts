@@ -48,7 +48,7 @@ $agentsUri = "https://dev.azure.com/$organizationName/_apis/distributedtask/pool
 $offlineAgents = (Invoke-RestMethod -Uri $agentsUri -Method GET -Headers $header).value | Where-Object { $_.status -eq 'offline' }
 
 if (!$offlineAgents) {
-  Write-Output "INFO: No offline agent found in $agentPoolName agent pool"
+  Write-Output "INFO: No offline agents found in $agentPoolName agent pool"
   exit 0
 }
 
