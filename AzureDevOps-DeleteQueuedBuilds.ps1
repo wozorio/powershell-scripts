@@ -10,7 +10,6 @@
 
 param(
   [Parameter(Mandatory = $true)]
-  [ValidateNotNullOrEmpty()]
   [string]$personalAccessToken,
 
   [Parameter(Mandatory = $true)]
