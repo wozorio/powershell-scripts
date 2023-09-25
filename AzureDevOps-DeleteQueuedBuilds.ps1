@@ -37,7 +37,7 @@ catch {
 }
 
 if (!$buildsToCancel) {
-  Write-Output "INFO: No queued builds found to be cancelled"
+  Write-Output "INFO: No queued builds found to be deleted"
   exit 0
 }
 
