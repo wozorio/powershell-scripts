@@ -49,7 +49,6 @@ ForEach ($build in $buildsToCancel) {
       -Method DELETE `
       -ContentType "application/json" `
       -Headers $header
-
   }
   catch {
     Throw $_
