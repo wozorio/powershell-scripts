@@ -2,7 +2,6 @@
 .DESCRIPTION
   Used by Terraform external data source resource to fetch pipeline ID from the Azure DevOps Pipelines REST API
 .NOTES
-  Version:       1.0
   Author:        Wellington Ozorio <well.ozorio@gmail.com>
   Creation Date: 2022-03-09
   Arguments:     pipelineName
@@ -22,18 +21,18 @@ $base64Pat = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("PA
 $header = @{authorization = "Basic $base64Pat" }
 
 try {
-  $jsonContent = Invoke-RestMethod -Uri $adoPipelinesApi -Method Get -ContentType "application/json" -Headers $header
-    
-  $pipelineId = $jsonContent.value | Where-Object { $_.name -eq "$pipelineName" }
-  $pipelineId = $pipelineId.id | ConvertTo-Json
+    $jsonContent = Invoke-RestMethod -Uri $adoPipelinesApi -Method Get -ContentType "application/json" -Headers $header
 
-  if ($pipelineId) {
-    Write-Output "{""pipeline_id"" : ""$pipelineId""}"
-  }
-  else {
-    Throw "ERROR: failed to fetch ID of $pipelineName pipeline"
-  }
+    $pipelineId = $jsonContent.value | Where-Object { $_.name -eq "$pipelineName" }
+    $pipelineId = $pipelineId.id | ConvertTo-Json
+
+    if ($pipelineId) {
+        Write-Output "{""pipeline_id"" : ""$pipelineId""}"
+    }
+    else {
+        Throw "ERROR: failed to fetch ID of $pipelineName pipeline"
+    }
 }
 catch {
-  Throw $_
+    Throw $_
 }
