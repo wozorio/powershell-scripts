@@ -25,13 +25,13 @@ param(
 
 $agentPoolsUri = "https://dev.azure.com/$organizationName/_apis/distributedtask/pools?api-version=$apiVersion"
 $base64Pat = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$personalAccessToken"))
-$header = @{Authorization = "Basic $base64Pat" }
+$headers = @{Authorization = "Basic $base64Pat" }
 
 try {
     $agentPool = (Invoke-RestMethod `
             -Uri $agentPoolsUri `
             -Method GET -ContentType "application/json" `
-            -Headers $header).value | Where-Object { $_.name -eq $agentPoolName }
+            -Headers $headers).value | Where-Object { $_.name -eq $agentPoolName }
 }
 catch {
     throw $_.Exception
@@ -44,7 +44,7 @@ if (!$agentPool) {
 
 $poolId = ($agentPool | Where-Object { $_.Name -eq $agentPoolName }).id
 $agentsUri = "https://dev.azure.com/$organizationName/_apis/distributedtask/pools/$poolId/agents?api-version=$apiVersion"
-$offlineAgents = (Invoke-RestMethod -Uri $agentsUri -Method GET -Headers $header).value | Where-Object { $_.status -eq 'offline' }
+$offlineAgents = (Invoke-RestMethod -Uri $agentsUri -Method GET -Headers $headers).value | Where-Object { $_.status -eq 'offline' }
 
 if (!$offlineAgents) {
     Write-Output "INFO: No offline agents found in $agentPoolName agent pool"
@@ -58,7 +58,7 @@ $offlineAgents | ForEach-Object {
             -Uri "https://dev.azure.com/$organizationName/_apis/distributedtask/pools/$poolId/agents/$($_.id)?api-version=$apiVersion" `
             -Method DELETE `
             -ContentType "application/json" `
-            -Headers $header
+            -Headers $headers
     }
     catch {
         Throw $_.Exception

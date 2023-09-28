@@ -25,10 +25,10 @@ param(
 
 $notStartedBuildsUri = "https://dev.azure.com/$organizationName/$projectName/_apis/build/builds?statusFilter=notStarted&api-version=$apiVersion"
 $base64Pat = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$personalAccessToken"))
-$header = @{authorization = "Basic $base64Pat" }
+$headers = @{authorization = "Basic $base64Pat" }
 
 try {
-    $queuedBuilds = (Invoke-RestMethod -Uri $notStartedBuildsUri -Method GET -ContentType "application/json" -Headers $header).value
+    $queuedBuilds = (Invoke-RestMethod -Uri $notStartedBuildsUri -Method GET -ContentType "application/json" -Headers $headers).value
 }
 catch {
     throw $_.Exception
@@ -46,7 +46,7 @@ ForEach ($build in $queuedBuilds) {
             -Uri "https://dev.azure.com/$organizationName/$projectName/_apis/build/builds/$($build.id)?api-version=$apiVersion" `
             -Method DELETE `
             -ContentType "application/json" `
-            -Headers $header
+            -Headers $headers
     }
     catch {
         Throw $_.Exception
