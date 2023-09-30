@@ -35,7 +35,7 @@ try {
 }
 catch {
     Write-Output "ERROR: Failed fetching $agentPoolName agent pool properties"
-    Throw "Exception: $_.Exception"
+    Throw $_.Exception
 }
 
 if (!$agentPool) {
@@ -50,7 +50,7 @@ try {
 }
 catch {
     Write-Output "ERROR: List of offline agents could not be fetched"
-    Throw "Exception: $_.Exception"
+    Throw $_.Exception
 }
 
 if (!$offlineAgents) {
@@ -69,6 +69,6 @@ $offlineAgents | ForEach-Object {
     }
     catch {
         Write-Output "ERROR: Failed deleting $($_.name) offline agent from $agentPoolName agent pool in $organizationName organization"
-        Throw "Exception: $_.Exception"
+        Throw $_.Exception
     }
 }
