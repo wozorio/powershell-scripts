@@ -60,7 +60,7 @@ if (!$offlineAgents) {
 
 $offlineAgents | ForEach-Object {
     try {
-        Write-Output "WARN: Removing $($_.name) agent from $agentPoolName agent pool in $organizationName organization"
+        Write-Output "WARN: Deleting $($_.name) offline agent from $agentPoolName agent pool in $organizationName organization"
         Invoke-RestMethod `
             -Uri "https://dev.azure.com/$organizationName/_apis/distributedtask/pools/$poolId/agents/$($_.id)?api-version=$apiVersion" `
             -Method DELETE `
@@ -68,7 +68,7 @@ $offlineAgents | ForEach-Object {
             -Headers $headers
     }
     catch {
-        Write-Output "ERROR: Failed removing $($_.name) agent from $agentPoolName agent pool in $organizationName organization"
+        Write-Output "ERROR: Failed deleting $($_.name) offline agent from $agentPoolName agent pool in $organizationName organization"
         Throw "Exception: $_.Exception"
     }
 }
