@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  lint:
+    name: Run PSSA
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Lint
+        uses: devblackops/github-action-psscriptanalyzer@master
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}

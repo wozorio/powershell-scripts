@@ -31,7 +31,8 @@ try {
     $queuedBuilds = (Invoke-RestMethod -Uri $notStartedBuildsUri -Method GET -ContentType "application/json" -Headers $headers).value
 }
 catch {
-    throw $_.Exception
+    Write-Output "ERROR: Failed fetching list of queued builds"
+    Throw "Exception: $_.Exception"
 }
 
 if (!$queuedBuilds) {
@@ -41,7 +42,7 @@ if (!$queuedBuilds) {
 
 ForEach ($build in $queuedBuilds) {
     try {
-        Write-Output "WARN: Deleting build $buildUri"
+        Write-Output "WARN: Deleting $buildUri queued build"
         Invoke-RestMethod `
             -Uri "https://dev.azure.com/$organizationName/$projectName/_apis/build/builds/$($build.id)?api-version=$apiVersion" `
             -Method DELETE `
@@ -49,6 +50,7 @@ ForEach ($build in $queuedBuilds) {
             -Headers $headers
     }
     catch {
-        Throw $_.Exception
+        Write-Output "ERROR: Failed deleting $buildUri queued build"
+        Throw "Exception: $_.Exception"
     }
 }

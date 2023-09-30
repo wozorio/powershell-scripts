@@ -34,17 +34,24 @@ try {
             -Headers $headers).value | Where-Object { $_.name -eq $agentPoolName }
 }
 catch {
-    throw $_.Exception
+    Write-Output "ERROR: Failed fetching $agentPoolName agent pool properties"
+    Throw "Exception: $_.Exception"
 }
 
 if (!$agentPool) {
-    Write-Output "ERROR: $agentPoolName agent pool not found in $organizationName organization"
-    exit 1
+    Throw "ERROR: $agentPoolName agent pool not found in $organizationName organization"
 }
 
 $poolId = ($agentPool | Where-Object { $_.Name -eq $agentPoolName }).id
 $agentsUri = "https://dev.azure.com/$organizationName/_apis/distributedtask/pools/$poolId/agents?api-version=$apiVersion"
-$offlineAgents = (Invoke-RestMethod -Uri $agentsUri -Method GET -Headers $headers).value | Where-Object { $_.status -eq 'offline' }
+
+try {
+    $offlineAgents = (Invoke-RestMethod -Uri $agentsUri -Method GET -Headers $headers).value | Where-Object { $_.status -eq 'offline' }
+}
+catch {
+    Write-Output "ERROR: List of offline agents could not be fetched"
+    Throw "Exception: $_.Exception"
+}
 
 if (!$offlineAgents) {
     Write-Output "INFO: No offline agents found in $agentPoolName agent pool"
@@ -61,6 +68,7 @@ $offlineAgents | ForEach-Object {
             -Headers $headers
     }
     catch {
-        Throw $_.Exception
+        Write-Output "ERROR: Failed removing $($_.name) agent from $agentPoolName agent pool in $organizationName organization"
+        Throw "Exception: $_.Exception"
     }
 }
