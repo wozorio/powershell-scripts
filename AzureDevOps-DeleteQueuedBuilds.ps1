@@ -32,7 +32,7 @@ try {
 }
 catch {
     Write-Output "ERROR: Failed fetching list of queued builds"
-    Throw "Exception: $_.Exception"
+    Throw $_.Exception
 }
 
 if (!$queuedBuilds) {
@@ -51,6 +51,6 @@ ForEach ($build in $queuedBuilds) {
     }
     catch {
         Write-Output "ERROR: Failed deleting $buildUri queued build"
-        Throw "Exception: $_.Exception"
+        Throw $_.Exception
     }
 }
