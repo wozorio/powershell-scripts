@@ -21,8 +21,6 @@ param(
     [string]$apiVersion = '7.1-preview.7'
 )
 
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-
 $notStartedBuildsUri = "https://dev.azure.com/$organizationName/$projectName/_apis/build/builds?statusFilter=notStarted&api-version=$apiVersion"
 $base64Pat = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$personalAccessToken"))
 $headers = @{authorization = "Basic $base64Pat" }
