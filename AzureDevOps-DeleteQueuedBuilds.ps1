@@ -18,7 +18,7 @@ param(
     [string]$projectName,
 
     [Parameter(Mandatory = $false)]
-    [string]$apiVersion = '7.1-preview.7'
+    [string]$apiVersion = "7.1-preview.7"
 )
 
 $notStartedBuildsUri = "https://dev.azure.com/$organizationName/$projectName/_apis/build/builds?statusFilter=notStarted&api-version=$apiVersion"

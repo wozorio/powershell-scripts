@@ -18,7 +18,7 @@ param(
     [string]$agentPoolName,
 
     [Parameter(Mandatory = $false)]
-    [string]$apiVersion = '7.2-preview.1'
+    [string]$apiVersion = "7.2-preview.1"
 )
 
 $agentPoolsUri = "https://dev.azure.com/$organizationName/_apis/distributedtask/pools?api-version=$apiVersion"
@@ -44,7 +44,7 @@ $poolId = ($agentPool | Where-Object { $_.Name -eq $agentPoolName }).id
 $agentsUri = "https://dev.azure.com/$organizationName/_apis/distributedtask/pools/$poolId/agents?api-version=$apiVersion"
 
 try {
-    $offlineAgents = (Invoke-RestMethod -Uri $agentsUri -Method GET -Headers $headers).value | Where-Object { $_.status -eq 'offline' }
+    $offlineAgents = (Invoke-RestMethod -Uri $agentsUri -Method GET -Headers $headers).value | Where-Object { $_.status -eq "offline" }
 }
 catch {
     Write-Output "ERROR: List of offline agents could not be fetched"
