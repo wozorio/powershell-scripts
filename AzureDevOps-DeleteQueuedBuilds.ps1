@@ -40,7 +40,7 @@ if (!$queuedBuilds) {
 
 ForEach ($build in $queuedBuilds) {
     try {
-        Write-Output "WARN: Deleting $buildUri queued build"
+        Write-Output "WARN: Deleting $($build.url) queued build"
         Invoke-RestMethod `
             -Uri "https://dev.azure.com/$organizationName/$projectName/_apis/build/builds/$($build.id)?api-version=$apiVersion" `
             -Method DELETE `
@@ -48,7 +48,7 @@ ForEach ($build in $queuedBuilds) {
             -Headers $headers
     }
     catch {
-        Write-Output "ERROR: Failed deleting $buildUri queued build"
+        Write-Output "ERROR: Failed deleting $($build.url) queued build"
         Throw $_.Exception
     }
 }
