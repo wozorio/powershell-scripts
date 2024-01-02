@@ -1,36 +1,36 @@
 <#
 .DESCRIPTION
-  Used by Terraform external data source resource to fetch pipeline ID from the Azure DevOps Pipelines REST API
+    Used by Terraform external data source resource to fetch pipeline ID from the Azure DevOps Pipelines REST API
 .NOTES
-  Author:        Wellington Ozorio <well.ozorio@gmail.com>
-  Creation Date: 2022-03-09
-  Arguments:     pipelineName
+    Author:        Wellington Ozorio <well.ozorio@gmail.com>
+    Creation Date: 2022-03-09
+    Arguments:     PipelineName
 #>
 
-$jsonPayload = [Console]::In.ReadLine()
-$json = ConvertFrom-Json $jsonPayload
+$JsonPayload = [Console]::In.ReadLine()
+$Json = ConvertFrom-Json $JsonPayload
 
-$pipelineName = $json.pipelineName
+$PipelineName = $Json.pipelineName
 
 # Azure DevOps Pipelines REST API reference:
 # https://docs.microsoft.com/en-us/rest/api/azure/devops/pipelines/pipelines/list?view=azure-devops-rest-6.0
-$adoPipelinesApi = "https://dev.azure.com/bosch-ciam/skid/_apis/pipelines?api-version=6.0-preview.1"
+$AdoPipelinesApi = "https://dev.azure.com/bosch-ciam/skid/_apis/pipelines?api-version=6.0-preview.1"
 
-$pat = "$env:AZDO_PERSONAL_ACCESS_TOKEN"
-$base64Pat = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("PAT:$pat"))
-$header = @{authorization = "Basic $base64Pat" }
+$Pat = "$env:AZDO_PERSONAL_ACCESS_TOKEN"
+$Base64Pat = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("PAT:$Pat"))
+$Headers = @{authorization = "Basic $Base64Pat" }
 
 try {
-    $jsonContent = Invoke-RestMethod -Uri $adoPipelinesApi -Method Get -ContentType "application/json" -Headers $header
+    $JsonContent = Invoke-RestMethod -Uri $AdoPipelinesApi -Method Get -ContentType "application/json" -Headers $Headers
 
-    $pipelineId = $jsonContent.value | Where-Object { $_.name -eq "$pipelineName" }
-    $pipelineId = $pipelineId.id | ConvertTo-Json
+    $PipelineId = $JsonContent.value | Where-Object { $_.name -eq "$PipelineName" }
+    $PipelineId = $PipelineId.id | ConvertTo-Json
 
-    if ($pipelineId) {
-        Write-Output "{""pipeline_id"" : ""$pipelineId""}"
+    if ($PipelineId) {
+        Write-Output "{""pipeline_id"" : ""$PipelineId""}"
     }
     else {
-        Throw "ERROR: failed to fetch ID of $pipelineName pipeline"
+        Throw "ERROR: failed to fetch ID of $PipelineName pipeline"
     }
 }
 catch {

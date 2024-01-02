@@ -1,72 +1,72 @@
 <#
 .DESCRIPTION
-  Used to batch delete offline build agents from a specified agent pool
+    Used to batch delete offline build agents from a specified agent pool
 .NOTES
-  Author:        Wellington Ozorio <well.ozorio@gmail.com>
-  Creation Date: 2023-09-25
-  Arguments:     personalAccessToken organizationName agentPoolName [apiVersion]
+    Author:        Wellington Ozorio <well.ozorio@gmail.com>
+    Creation Date: 2023-09-25
+    Arguments:     PersonalAccessToken OrganizationName AgentPoolName [ApiVersion]
 #>
 
 param(
     [Parameter(Mandatory = $true)]
-    [string]$personalAccessToken,
+    [string]$PersonalAccessToken,
 
     [Parameter(Mandatory = $true)]
-    [string]$organizationName,
+    [string]$OrganizationName,
 
     [Parameter(Mandatory = $true)]
-    [string]$agentPoolName,
+    [string]$AgentPoolName,
 
     [Parameter(Mandatory = $false)]
-    [string]$apiVersion = "7.2-preview.1"
+    [string]$ApiVersion = "7.2-preview.1"
 )
 
-$agentPoolsUri = "https://dev.azure.com/$organizationName/_apis/distributedtask/pools?api-version=$apiVersion"
-$base64Pat = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$personalAccessToken"))
-$headers = @{Authorization = "Basic $base64Pat" }
+$AgentPoolsUri = "https://dev.azure.com/$OrganizationName/_apis/distributedtask/pools?api-version=$ApiVersion"
+$Base64Pat = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$PersonalAccessToken"))
+$Headers = @{Authorization = "Basic $Base64Pat" }
 
 try {
-    $agentPool = (Invoke-RestMethod `
-            -Uri $agentPoolsUri `
+    $AgentPool = (Invoke-RestMethod `
+            -Uri $AgentPoolsUri `
             -Method GET -ContentType "application/json" `
-            -Headers $headers).value | Where-Object { $_.name -eq $agentPoolName }
+            -Headers $Headers).value | Where-Object { $_.name -eq $AgentPoolName }
 }
 catch {
-    Write-Output "ERROR: Failed fetching $agentPoolName agent pool properties"
+    Write-Output "ERROR: Failed fetching $AgentPoolName agent pool properties"
     Throw $_.Exception
 }
 
-if (!$agentPool) {
-    Throw "ERROR: $agentPoolName agent pool not found in $organizationName organization"
+if (!$AgentPool) {
+    Throw "ERROR: $AgentPoolName agent pool not found in $OrganizationName organization"
 }
 
-$poolId = ($agentPool | Where-Object { $_.Name -eq $agentPoolName }).id
-$agentsUri = "https://dev.azure.com/$organizationName/_apis/distributedtask/pools/$poolId/agents?api-version=$apiVersion"
+$PoolId = ($AgentPool | Where-Object { $_.Name -eq $AgentPoolName }).id
+$AgentsUri = "https://dev.azure.com/$OrganizationName/_apis/distributedtask/pools/$PoolId/agents?api-version=$ApiVersion"
 
 try {
-    $offlineAgents = (Invoke-RestMethod -Uri $agentsUri -Method GET -Headers $headers).value | Where-Object { $_.status -eq "offline" }
+    $OfflineAgents = (Invoke-RestMethod -Uri $AgentsUri -Method GET -Headers $Headers).value | Where-Object { $_.status -eq "offline" }
 }
 catch {
     Write-Output "ERROR: List of offline agents could not be fetched"
     Throw $_.Exception
 }
 
-if (!$offlineAgents) {
-    Write-Output "INFO: No offline agents found in $agentPoolName agent pool"
+if (!$OfflineAgents) {
+    Write-Output "INFO: No offline agents found in $AgentPoolName agent pool"
     exit 0
 }
 
-$offlineAgents | ForEach-Object {
+$OfflineAgents | ForEach-Object {
     try {
-        Write-Output "WARN: Deleting $($_.name) offline agent from $agentPoolName agent pool in $organizationName organization"
+        Write-Output "WARN: Deleting $($_.name) offline agent from $AgentPoolName agent pool in $OrganizationName organization"
         Invoke-RestMethod `
-            -Uri "https://dev.azure.com/$organizationName/_apis/distributedtask/pools/$poolId/agents/$($_.id)?api-version=$apiVersion" `
+            -Uri "https://dev.azure.com/$OrganizationName/_apis/distributedtask/pools/$PoolId/agents/$($_.id)?api-version=$ApiVersion" `
             -Method DELETE `
             -ContentType "application/json" `
-            -Headers $headers
+            -Headers $Headers
     }
     catch {
-        Write-Output "ERROR: Failed deleting $($_.name) offline agent from $agentPoolName agent pool in $organizationName organization"
+        Write-Output "ERROR: Failed deleting $($_.name) offline agent from $AgentPoolName agent pool in $OrganizationName organization"
         Throw $_.Exception
     }
 }
